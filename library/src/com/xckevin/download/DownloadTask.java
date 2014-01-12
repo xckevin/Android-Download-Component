@@ -108,7 +108,6 @@ public class DownloadTask {
 
 	public void setUrl(String url) {
 		this.url = url;
-		this.id = MD5.getMD5(url);
 	}
 
 	public String getThumbUrl() {

@@ -126,7 +126,7 @@ public class DownloadOperator implements Runnable {
 
 	private RandomAccessFile buildDownloadFile() throws IOException {
 		String fileName = FileUtil.getFileNameByUrl(task.getUrl());
-		File file = new File(DownloadManager.DOWNLOAD_DIR, fileName);
+		File file = new File(manager.getConfig().downloadSavePath, fileName);
 		if(!file.getParentFile().isDirectory() && !file.getParentFile().mkdirs()) {
 			throw new IOException("cannot create download folder");
 		}

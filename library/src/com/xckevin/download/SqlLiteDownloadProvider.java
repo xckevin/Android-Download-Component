@@ -1,4 +1,4 @@
-package com.xckevin.download.impl;
+package com.xckevin.download;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,14 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
-import com.xckevin.download.DownloadManager;
-import com.xckevin.download.DownloadProvider;
-import com.xckevin.download.DownloadTask;
 
 public class SqlLiteDownloadProvider implements DownloadProvider {
 	
@@ -25,9 +21,9 @@ public class SqlLiteDownloadProvider implements DownloadProvider {
 	
 	private SQLiteDatabase db;
 	
-	private SqlLiteDownloadProvider(Context context, DownloadManager manager) {
+	private SqlLiteDownloadProvider(DownloadManager manager) {
 		this.manager = manager;
-		File dbFile = new File(DownloadManager.DOWNLOAD_DIR, "download.db");
+		File dbFile = new File(manager.getConfig().downloadSavePath, "download.db");
 		if(dbFile.exists()) {
 			db = SQLiteDatabase.openDatabase(dbFile.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
 		} else {
@@ -46,9 +42,9 @@ public class SqlLiteDownloadProvider implements DownloadProvider {
 		createTables();
 	}
 	
-	public static synchronized SqlLiteDownloadProvider getInstance(Context context, DownloadManager manager) {
+	public static synchronized SqlLiteDownloadProvider getInstance(DownloadManager manager) {
 		if(instance == null) {
-			instance = new SqlLiteDownloadProvider(context, manager);
+			instance = new SqlLiteDownloadProvider(manager);
 		}
 		
 		return instance;

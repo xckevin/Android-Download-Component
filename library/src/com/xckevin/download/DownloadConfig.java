@@ -1,5 +1,8 @@
 package com.xckevin.download;
 
+import java.io.File;
+
+
 import android.content.Context;
 
 public class DownloadConfig {
@@ -8,7 +11,22 @@ public class DownloadConfig {
 	
 	int maxDownloadThread;
 	
+	int retryTime;
+	
 	DownloadProvider provider;
+	
+	DownloadTaskIDCreator creator;
+	
+	public static DownloadConfig getDefaultDownloadConfig(DownloadManager manager) {
+		DownloadConfig config = new DownloadConfig();
+		config.downloadSavePath = Env.ROOT_DIR + File.separator + "download";
+		config.maxDownloadThread = 2;
+		config.retryTime = 2;
+		config.provider = SqlLiteDownloadProvider.getInstance(manager);
+		config.creator = new MD5DownloadTaskIDCreator();
+		
+		return config;
+	}
 	
 	public static class Builder {
 		
@@ -28,8 +46,18 @@ public class DownloadConfig {
 			return this;
 		}
 		
+		public Builder setRetryTime(int retryTime) {
+			config.retryTime = retryTime;
+			return this;
+		}
+		
 		public Builder setDownloadProvider(DownloadProvider provider) {
 			config.provider = provider;
+			return this;
+		}
+		
+		public Builder setDownloadTaskIDCreator(DownloadTaskIDCreator creator) {
+			config.creator = creator;
 			return this;
 		}
 	}

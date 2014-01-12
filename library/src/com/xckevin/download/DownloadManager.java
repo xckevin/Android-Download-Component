@@ -1,6 +1,5 @@
 package com.xckevin.download;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -8,18 +7,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.xckevin.download.impl.SqlLiteDownloadProvider;
-
 public class DownloadManager {
 
 	private static final String TAG = "DownloadManager";
-
-	public static String DOWNLOAD_DIR = Env.ROOT_DIR + File.separator + "download";
 
 	//	static {
 	//		if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
@@ -30,6 +24,8 @@ public class DownloadManager {
 	//	}
 
 	private static DownloadManager instance;
+	
+	private DownloadConfig config;
 
 	private HashMap<DownloadTask, DownloadOperator> taskOperators = new HashMap<DownloadTask, DownloadOperator>();
 
@@ -43,18 +39,40 @@ public class DownloadManager {
 
 	private ExecutorService pool;
 
-	private DownloadManager(Context context) {
-		provider = SqlLiteDownloadProvider.getInstance(context, this);
-		//		handler = new DownloadHandler(this);
-		pool = Executors.newFixedThreadPool(2);
+	private DownloadManager() {
+		
 	}
 
-	public static synchronized DownloadManager getInstance(Context context) {
+	public static synchronized DownloadManager getInstance() {
 		if(instance == null) {
-			instance = new DownloadManager(context);
+			instance = new DownloadManager();
 		}
 
 		return instance;
+	}
+	
+	public void init() {
+		config = DownloadConfig.getDefaultDownloadConfig(this);
+		provider = config.provider;
+		pool = Executors.newFixedThreadPool(config.maxDownloadThread);
+	}
+	
+	public void init(DownloadConfig config) {
+		if(config == null) {
+			init();
+			return ;
+		}
+		this.config = config;
+		provider = config.provider;
+		pool = Executors.newFixedThreadPool(config.maxDownloadThread);
+	}
+
+	public DownloadConfig getConfig() {
+		return config;
+	}
+
+	public void setConfig(DownloadConfig config) {
+		this.config = config;
 	}
 
 	public void addDownloadTask(DownloadTask task) {
@@ -77,6 +95,7 @@ public class DownloadManager {
 		task.setStatus(DownloadTask.STATUS_PENDDING);
 		DownloadTask historyTask = provider.findDownloadTaskById(task.getId());
 		if(historyTask == null) {
+			task.setId(config.creator.createId(task));
 			provider.saveDownloadTask(task);
 		} else {
 			provider.updateDownloadTask(task);
@@ -172,6 +191,10 @@ public class DownloadManager {
 			return ;
 		}
 		taskObservers.remove(observer);
+	}
+	
+	public DownloadTaskIDCreator getDownloadTaskIDCreator() {
+		return config.creator;
 	}
 
 	public void close() {
