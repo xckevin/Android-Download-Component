@@ -12,25 +12,26 @@ import android.text.TextUtils;
 import com.xckevin.download.util.FileUtil;
 
 public class DownloadOperator implements Runnable {
-	
-	private static final String TAG = "DownloadOperator";
 
 	// 100 kb
 	private static final long REFRESH_INTEVAL_SIZE = 100 * 1024;
-	
+
 	private DownloadManager manager;
 
 	private DownloadTask task;
-	
+
+	// already try times
+	private int tryTimes;
 
 	private volatile boolean pauseFlag;
 	private volatile boolean stopFlag;
-	
+
 	private String filePath;
 
 	DownloadOperator(DownloadManager manager, DownloadTask task) {
 		this.manager = manager;
 		this.task = task;
+		this.tryTimes = 0;
 	}
 
 	void pauseDownload() {
@@ -57,76 +58,85 @@ public class DownloadOperator implements Runnable {
 
 	@Override
 	public void run() {
-		RandomAccessFile raf = null;
-		HttpURLConnection conn = null;
-		InputStream is = null;
-		try {
-			raf = buildDownloadFile();
-			conn = initConnection();
+		do {
+			RandomAccessFile raf = null;
+			HttpURLConnection conn = null;
+			InputStream is = null;
+			try {
+				raf = buildDownloadFile();
+				conn = initConnection();
 
-			conn.connect();
+				conn.connect();
 
-			task.setDownloadSavePath(filePath);
-			if(task.getDownloadTotalSize() == 0) {
-				task.setDownloadTotalSize(conn.getContentLength());
-			}
-			if(TextUtils.isEmpty(task.getMimeType())) {
-				task.setMimeType(conn.getContentType());
-			}
-			task.setStatus(DownloadTask.STATUS_RUNNING);
-			manager.onDownloadStarted(task);
-			
+				task.setDownloadSavePath(filePath);
+				if(task.getDownloadTotalSize() == 0) {
+					task.setDownloadTotalSize(conn.getContentLength());
+				}
+				if(TextUtils.isEmpty(task.getMimeType())) {
+					task.setMimeType(conn.getContentType());
+				}
+				task.setStatus(DownloadTask.STATUS_RUNNING);
+				manager.onDownloadStarted(task);
 
-			is = conn.getInputStream();
-			
-			byte[] buffer = new byte[8192];
-			int count = 0;
-			long total = task.getDownloadFinishedSize();
-			long prevTime = System.currentTimeMillis();
-			long achieveSize = total;
-			while(!stopFlag && (count = is.read(buffer)) != -1) {
-				while(pauseFlag) {
-					manager.onDownloadPaused(task);
-					synchronized (this) {
-						try {
-							wait();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-							manager.onDownloadResumed(task);
+
+				is = conn.getInputStream();
+
+				byte[] buffer = new byte[8192];
+				int count = 0;
+				long total = task.getDownloadFinishedSize();
+				long prevTime = System.currentTimeMillis();
+				long achieveSize = total;
+				while(!stopFlag && (count = is.read(buffer)) != -1) {
+					while(pauseFlag) {
+						manager.onDownloadPaused(task);
+						synchronized (this) {
+							try {
+								wait();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+								manager.onDownloadResumed(task);
+							}
 						}
 					}
-				}
 
-				raf.write(buffer, 0, count);
-				total += count;
-				
-				long tempSize = total - achieveSize;
-				if(tempSize > REFRESH_INTEVAL_SIZE) {
-					long tempTime = System.currentTimeMillis() - prevTime;
-					long speed = tempSize * 1000 / tempTime;
-					achieveSize = total;
-					prevTime = System.currentTimeMillis();
-					task.setDownloadFinishedSize(total);
-					task.setDownloadSpeed(speed);
-					manager.updateDownloadTask(task, total, speed);
+					raf.write(buffer, 0, count);
+					total += count;
+
+					long tempSize = total - achieveSize;
+					if(tempSize > REFRESH_INTEVAL_SIZE) {
+						long tempTime = System.currentTimeMillis() - prevTime;
+						long speed = tempSize * 1000 / tempTime;
+						achieveSize = total;
+						prevTime = System.currentTimeMillis();
+						task.setDownloadFinishedSize(total);
+						task.setDownloadSpeed(speed);
+						manager.updateDownloadTask(task, total, speed);
+					}
+				}
+				task.setDownloadFinishedSize(total);
+
+				if(stopFlag) {
+					manager.onDownloadCanceled(task);
+				} else {
+					manager.onDownloadSuccessed(task);
+				}
+				break;
+			} catch (IOException e) {
+				e.printStackTrace();
+				if(tryTimes > manager.getConfig().getRetryTime()) {
+					manager.onDownloadFailed(task);
+					break;
+				} else {
+					tryTimes ++;
+					continue;
 				}
 			}
-			task.setDownloadFinishedSize(total);
-
-			if(stopFlag) {
-				manager.onDownloadCanceled(task);
-			} else {
-				manager.onDownloadSuccessed(task);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			manager.onDownloadFailed(task);
-		}
+		} while(true);
 	}
 
 	private RandomAccessFile buildDownloadFile() throws IOException {
 		String fileName = FileUtil.getFileNameByUrl(task.getUrl());
-		File file = new File(manager.getConfig().downloadSavePath, fileName);
+		File file = new File(manager.getConfig().getDownloadSavePath(), fileName);
 		if(!file.getParentFile().isDirectory() && !file.getParentFile().mkdirs()) {
 			throw new IOException("cannot create download folder");
 		}

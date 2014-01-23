@@ -1,5 +1,7 @@
 package com.xckevin.download.util;
 
+import java.util.Locale;
+
 /**
  * MD 加密
  *
@@ -23,7 +25,7 @@ public class MD5 {
                 str[k++] = hexDigits[byte0 >>> 4 & 0xf];
                 str[k++] = hexDigits[byte0 & 0xf];
             }
-            s = new String(str).toUpperCase();
+            s = new String(str).toUpperCase(Locale.ENGLISH);
 
         } catch (Exception e) {
 

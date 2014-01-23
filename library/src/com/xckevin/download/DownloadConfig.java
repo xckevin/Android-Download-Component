@@ -7,16 +7,36 @@ import android.content.Context;
 
 public class DownloadConfig {
 
-	String downloadSavePath;
+	private String downloadSavePath;
 	
-	int maxDownloadThread;
+	private int maxDownloadThread;
 	
-	int retryTime;
+	private int retryTime;
 	
-	DownloadProvider provider;
+	private DownloadProvider provider;
 	
-	DownloadTaskIDCreator creator;
+	private DownloadTaskIDCreator creator;
 	
+	public String getDownloadSavePath() {
+		return downloadSavePath;
+	}
+
+	public int getMaxDownloadThread() {
+		return maxDownloadThread;
+	}
+
+	public int getRetryTime() {
+		return retryTime;
+	}
+
+	public DownloadProvider getProvider() {
+		return provider;
+	}
+
+	public DownloadTaskIDCreator getCreator() {
+		return creator;
+	}
+
 	public static DownloadConfig getDefaultDownloadConfig(DownloadManager manager) {
 		DownloadConfig config = new DownloadConfig();
 		config.downloadSavePath = Env.ROOT_DIR + File.separator + "download";

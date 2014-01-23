@@ -1,7 +1,5 @@
 package com.xckevin.download;
 
-import com.xckevin.download.util.MD5;
-
 public class DownloadTask {
 	
 	public static final String ID = "_id";

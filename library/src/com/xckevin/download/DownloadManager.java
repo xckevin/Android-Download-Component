@@ -53,8 +53,8 @@ public class DownloadManager {
 	
 	public void init() {
 		config = DownloadConfig.getDefaultDownloadConfig(this);
-		provider = config.provider;
-		pool = Executors.newFixedThreadPool(config.maxDownloadThread);
+		provider = config.getProvider();
+		pool = Executors.newFixedThreadPool(config.getMaxDownloadThread());
 	}
 	
 	public void init(DownloadConfig config) {
@@ -63,8 +63,8 @@ public class DownloadManager {
 			return ;
 		}
 		this.config = config;
-		provider = config.provider;
-		pool = Executors.newFixedThreadPool(config.maxDownloadThread);
+		provider = config.getProvider();
+		pool = Executors.newFixedThreadPool(config.getMaxDownloadThread());
 	}
 
 	public DownloadConfig getConfig() {
@@ -95,7 +95,7 @@ public class DownloadManager {
 		task.setStatus(DownloadTask.STATUS_PENDDING);
 		DownloadTask historyTask = provider.findDownloadTaskById(task.getId());
 		if(historyTask == null) {
-			task.setId(config.creator.createId(task));
+			task.setId(config.getCreator().createId(task));
 			provider.saveDownloadTask(task);
 		} else {
 			provider.updateDownloadTask(task);
@@ -193,10 +193,6 @@ public class DownloadManager {
 		taskObservers.remove(observer);
 	}
 	
-	public DownloadTaskIDCreator getDownloadTaskIDCreator() {
-		return config.creator;
-	}
-
 	public void close() {
 		pool.shutdownNow();
 	}

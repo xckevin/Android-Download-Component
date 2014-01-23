@@ -23,7 +23,7 @@ public class SqlLiteDownloadProvider implements DownloadProvider {
 	
 	private SqlLiteDownloadProvider(DownloadManager manager) {
 		this.manager = manager;
-		File dbFile = new File(manager.getConfig().downloadSavePath, "download.db");
+		File dbFile = new File(manager.getConfig().getDownloadSavePath(), "download.db");
 		if(dbFile.exists()) {
 			db = SQLiteDatabase.openDatabase(dbFile.getPath(), null, SQLiteDatabase.OPEN_READWRITE);
 		} else {
