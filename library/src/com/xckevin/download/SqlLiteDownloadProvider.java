@@ -56,11 +56,9 @@ public class SqlLiteDownloadProvider implements DownloadProvider {
 		buffer.append("(");
 		buffer.append("`").append(DownloadTask.ID).append("` VARCHAR PRIMARY KEY,");
 		buffer.append("`").append(DownloadTask.URL).append("` VARCHAR,");
-		buffer.append("`").append(DownloadTask.THUMBURL).append("` VARCHAR,");
 		buffer.append("`").append(DownloadTask.MIMETYPE).append("` VARCHAR,");
 		buffer.append("`").append(DownloadTask.SAVEPATH).append("` VARCHAR,");
 		buffer.append("`").append(DownloadTask.NAME).append("` VARCHAR,");
-		buffer.append("`").append(DownloadTask.DESC).append("` VARCHAR,");
 		buffer.append("`").append(DownloadTask.FINISHEDSIZE).append("` LONG,");
 		buffer.append("`").append(DownloadTask.TOTALSIZE).append("` LONG,");
 		buffer.append("`").append(DownloadTask.STATUS).append("` int");
@@ -127,13 +125,11 @@ public class SqlLiteDownloadProvider implements DownloadProvider {
 		ContentValues values = new ContentValues();
 		values.put(DownloadTask.ID, task.getId());
 		values.put(DownloadTask.URL, task.getUrl());
-		values.put(DownloadTask.THUMBURL, task.getThumbUrl());
 		values.put(DownloadTask.MIMETYPE, task.getMimeType());
 		values.put(DownloadTask.SAVEPATH, task.getDownloadSavePath());
 		values.put(DownloadTask.FINISHEDSIZE, task.getDownloadFinishedSize());
 		values.put(DownloadTask.TOTALSIZE, task.getDownloadTotalSize());
 		values.put(DownloadTask.NAME, task.getName());
-		values.put(DownloadTask.DESC, task.getDesc());
 		values.put(DownloadTask.STATUS, task.getStatus());
 		
 		return values;
@@ -143,9 +139,7 @@ public class SqlLiteDownloadProvider implements DownloadProvider {
 		DownloadTask task = new DownloadTask();
 		task.setId(cursor.getString(cursor.getColumnIndex(DownloadTask.ID)));
 		task.setName(cursor.getString(cursor.getColumnIndex(DownloadTask.NAME)));
-		task.setDesc(cursor.getString(cursor.getColumnIndex(DownloadTask.DESC)));
 		task.setUrl(cursor.getString(cursor.getColumnIndex(DownloadTask.URL)));
-		task.setThumbUrl(cursor.getString(cursor.getColumnIndex(DownloadTask.THUMBURL)));
 		task.setMimeType(cursor.getString(cursor.getColumnIndex(DownloadTask.MIMETYPE)));
 		task.setDownloadSavePath(cursor.getString(cursor.getColumnIndex(DownloadTask.SAVEPATH)));
 		task.setDownloadFinishedSize(cursor.getLong(cursor.getColumnIndex(DownloadTask.FINISHEDSIZE)));

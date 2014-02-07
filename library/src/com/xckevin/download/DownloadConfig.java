@@ -17,6 +17,13 @@ public class DownloadConfig {
 	
 	private DownloadTaskIDCreator creator;
 	
+	private DownloadConfig() {
+		downloadSavePath = Env.ROOT_DIR + File.separator + "download";
+		maxDownloadThread = 2;
+		retryTime = 2;
+		creator = new MD5DownloadTaskIDCreator();
+	}
+	
 	public String getDownloadSavePath() {
 		return downloadSavePath;
 	}
@@ -29,7 +36,10 @@ public class DownloadConfig {
 		return retryTime;
 	}
 
-	public DownloadProvider getProvider() {
+	public DownloadProvider getProvider(DownloadManager manager) {
+		if(provider == null) {
+			provider = SqlLiteDownloadProvider.getInstance(manager);
+		}
 		return provider;
 	}
 
@@ -39,12 +49,7 @@ public class DownloadConfig {
 
 	public static DownloadConfig getDefaultDownloadConfig(DownloadManager manager) {
 		DownloadConfig config = new DownloadConfig();
-		config.downloadSavePath = Env.ROOT_DIR + File.separator + "download";
-		config.maxDownloadThread = 2;
-		config.retryTime = 2;
 		config.provider = SqlLiteDownloadProvider.getInstance(manager);
-		config.creator = new MD5DownloadTaskIDCreator();
-		
 		return config;
 	}
 	
@@ -54,6 +59,10 @@ public class DownloadConfig {
 		
 		public Builder(Context context) {
 			config = new DownloadConfig();
+		}
+		
+		public DownloadConfig build() {
+			return config;
 		}
 		
 		public Builder setDownloadSavePath(String downloadSavePath) {

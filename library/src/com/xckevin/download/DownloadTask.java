@@ -3,15 +3,13 @@ package com.xckevin.download;
 public class DownloadTask {
 	
 	public static final String ID = "_id";
-	public static final String URL = "c";
-	public static final String THUMBURL = "d";
-	public static final String MIMETYPE = "e";
-	public static final String SAVEPATH = "f";
-	public static final String FINISHEDSIZE = "h";
-	public static final String TOTALSIZE = "i";
-	public static final String NAME = "j";
-	public static final String DESC = "k";
-	public static final String STATUS = "l";
+	public static final String URL = "a";
+	public static final String MIMETYPE = "b";
+	public static final String SAVEPATH = "c";
+	public static final String FINISHEDSIZE = "d";
+	public static final String TOTALSIZE = "e";
+	public static final String NAME = "f";
+	public static final String STATUS = "g";
 	
 	public static final int STATUS_PENDDING = 1 << 0;
 	
@@ -29,11 +27,7 @@ public class DownloadTask {
 	
 	private String name;
 	
-	private String desc;
-	
 	private String url;
-	
-	private String thumbUrl;
 	
 	private String mimeType;
 	
@@ -92,28 +86,12 @@ public class DownloadTask {
 		this.name = name;
 	}
 
-	public String getDesc() {
-		return desc;
-	}
-
-	public void setDesc(String desc) {
-		this.desc = desc;
-	}
-
 	public String getUrl() {
 		return url;
 	}
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public String getThumbUrl() {
-		return thumbUrl;
-	}
-
-	public void setThumbUrl(String thumbUrl) {
-		this.thumbUrl = thumbUrl;
 	}
 
 	public String getMimeType() {

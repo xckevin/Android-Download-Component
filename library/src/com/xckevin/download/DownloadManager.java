@@ -53,7 +53,7 @@ public class DownloadManager {
 	
 	public void init() {
 		config = DownloadConfig.getDefaultDownloadConfig(this);
-		provider = config.getProvider();
+		provider = config.getProvider(this);
 		pool = Executors.newFixedThreadPool(config.getMaxDownloadThread());
 	}
 	
@@ -63,7 +63,7 @@ public class DownloadManager {
 			return ;
 		}
 		this.config = config;
-		provider = config.getProvider();
+		provider = config.getProvider(this);
 		pool = Executors.newFixedThreadPool(config.getMaxDownloadThread());
 	}
 
